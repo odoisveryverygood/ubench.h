@@ -154,15 +154,21 @@ endfunction()
 
 ubench_add_test(ubench_test)
 
-ubench_set_c_flags(test_duration.c "-std=gnu89")
-ubench_set_c_flags(test_duration_main.c "-std=gnu89")
-add_executable(ubench_duration_test test_duration_main.c test_duration.c)
 add_test(
-  NAME ubench_duration_behavior
-  COMMAND ${CMAKE_COMMAND}
-    "-DUBENCH_DURATION_TEST=$<TARGET_FILE:ubench_duration_test>"
-    -P "${CMAKE_CURRENT_SOURCE_DIR}/check_duration.cmake"
+  NAME ubench_duration
+  COMMAND $<TARGET_FILE:ubench_test> --duration=1 --confidence=100
+          --filter=c.do_nothing
 )
+add_test(
+  NAME ubench_duration_zero
+  COMMAND $<TARGET_FILE:ubench_test> --duration=0 --list-benchmarks
+)
+set_tests_properties(ubench_duration_zero PROPERTIES WILL_FAIL TRUE)
+add_test(
+  NAME ubench_duration_overflow
+  COMMAND $<TARGET_FILE:ubench_test> --duration=9223372036855 --list-benchmarks
+)
+set_tests_properties(ubench_duration_overflow PROPERTIES WILL_FAIL TRUE)
 
 # Whole-program-optimization variant.
 ubench_add_test(ubench_test_wpo)
